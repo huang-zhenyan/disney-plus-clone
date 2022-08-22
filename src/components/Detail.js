@@ -1,15 +1,40 @@
-import React from 'react'
+import React, { useEffect, useState } from 'react'
 import styled from 'styled-components'
+import { useParams } from 'react-router-dom'
+import db from "../firebase"
 
 const Detail = () => {
+
+    const { id } = useParams();
+    const [ movie, setMovie ] = useState()
+    
+    useEffect(() => {
+        // Grab the movie info from db
+        db.collection("Movies")
+        .doc(id)
+        .get()
+        .then((doc) => {
+            if(doc.exists) {
+                // save movie date
+                setMovie(doc.data());
+            } else {
+                // redirect to home page
+                console.log("No such document in firebase")
+            }
+        }).catch((err) => {
+            console.log("Error :", err);
+          });
+    }, [id])
+
   return (
-    <div>
         <Container>
+            {movie && (
+                <>
             <Background>
-                <img src="https://cdn.vox-cdn.com/thumbor/wJ71E7nJ_4Wj0btm5seEnHNJ4Xk=/0x0:4096x2304/1200x800/filters:focal(1973x1175:2627x1829)/cdn.vox-cdn.com/uploads/chorus_image/image/60190709/BO_RGB_s120_22a_cs_pub.pub16.318.0.jpg"/>
+                <img src={movie.backgroundImg}/>
             </Background>
             <ImageTitle>
-                <img src="https://prod-ripcut-delivery.disney-plus.net/v1/variant/disney/D7AEE1F05D10FC37C873176AAA26F777FC1B71E7A6563F36C6B1B497CAB1CEC2/scale?width=1440&aspectRatio=1.78"/>
+                <img src={movie.titleImg}/>
             </ImageTitle>
             <Controls>
                 <PlayButton>
@@ -28,13 +53,15 @@ const Detail = () => {
                 </GroupWatchButton>
             </Controls>
             <SubTitle>
-                Subtitle
+                {movie.subTitle}
             </SubTitle>
             <Description>
-                Description
+                {movie.description}
             </Description>
+                </>
+            )}
+
         </Container>
-    </div>
   )
 }
 
@@ -138,4 +165,5 @@ const Description = styled.div`
     font-size: 20px;
     margin-top: 16px;
     color: rgb(249, 249, 249);
+    width: 45%;
 `
